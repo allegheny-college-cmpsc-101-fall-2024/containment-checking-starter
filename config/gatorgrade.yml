@@ -1,0 +1,98 @@
+setup: |
+  cd containmentcheck && poetry install
+  echo "Done installing project dependencies!"
+---
+
+# perform checks on a file
+- containmentcheck/containmentcheck/main.py:
+    - description: Ensure that the main.py file exists in the containmentcheck/containmentcheck/ directory
+      check: ConfirmFileExists
+    - description: Complete all TODOs, remove the TODO markers, and rewrite comments for main.py
+      check: MatchFileFragment
+      options:
+        fragment: TODO
+        count: 0
+        exact: true
+    - description: Create a sufficient number of docstring (i.e., multiple-line) comments in main.py
+      check: CountMultipleLineComments
+      options:
+        language: "Python"
+        count: 3
+        exact: false
+    - description: Create a sufficient number of single-line comments in main.py
+      check: CountSingleLineComments
+      options:
+        language: "Python"
+        count: 5
+        exact: false
+
+# perform checks on a file
+- writing/reflection.md:
+    - description: Ensure that the reflection.md file exists in the writing/ directory
+      check: ConfirmFileExists
+    - description: Complete all TODOs, remove the TODO markers, and rewrite comments for the reflection
+      check: MatchFileFragment
+      options:
+        fragment: TODO
+        count: 0
+        exact: true
+    - description: Delete the 'Add Your Name Here' prompt in the reflection file
+      check: MatchFileFragment
+      options:
+        fragment: "Add Your Name Here"
+        count: 0
+        exact: true
+    - description: Confirm that the markdown file has the correct number of headers
+      check: CountMarkdownTags
+      options:
+        tag: heading
+        count: 12
+        exact: false
+    - description: Confirm that the markdown file has the correct number of fenced code blocks
+      check: CountMarkdownTags
+      options:
+        tag: code_block
+        count: 5
+        exact: false
+
+# run a command
+- description: Pass the linting and formatting checks run by ruff
+  command: cd containmentcheck && poetry run task ruff
+
+# run a command
+- description: Pass the type checks run by mypy
+  command: cd containmentcheck && poetry run task mypy
+
+# run a command
+- description: Pass the linting checks run by pymarkdown
+  command: cd containmentcheck && poetry run task markdownlint
+
+# run the program and confirm correct number of lines in the output
+- description: Run the program and confirm the correct number of non-blank lines in the output, using list approach
+  check: CountCommandOutput
+  options:
+    command: 'cd containmentcheck && poetry run containmentcheck --size 5000 --maximum 50000000 --approach list'
+    count: 7
+    exact: false
+
+# run the program and confirm correct number of lines in the output
+- description: Run the program and confirm the correct number of non-blank lines in the output, using tuple approach
+  check: CountCommandOutput
+  options:
+    command: 'cd containmentcheck && poetry run containmentcheck --size 5000 --maximum 50000000 --approach tuple'
+    count: 7
+    exact: false
+
+# run the program and confirm correct number of lines in the output
+- description: Run the program and confirm the correct number of non-blank lines in the output, using set approach
+  check: CountCommandOutput
+  options:
+    command: 'cd containmentcheck && poetry run containmentcheck --size 5000 --maximum 50000000 --approach set'
+    count: 7
+    exact: false
+
+# count number of commits in the GitHub repository
+- description: Have at least a specific minimum of commits in repository
+  check: CountCommits
+  options:
+    count: 10
